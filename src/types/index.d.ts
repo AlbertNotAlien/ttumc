@@ -4,5 +4,7 @@ export type SiteConfig = {
   links: {
     facebook: string;
     instagram: string;
+    youtube: string;
+    github: string;
   };
 };

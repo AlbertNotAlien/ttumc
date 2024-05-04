@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Icons } from '@/components/icons';
+import { Icon } from '@/components/icon';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -37,6 +37,12 @@ export default function SiteHeader() {
         </Link>
         <Link
           href="#/"
+          className="text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Rules
+        </Link>
+        <Link
+          href="#/"
           className="text-foreground transition-colors hover:text-foreground"
         >
           Booking
@@ -45,7 +51,7 @@ export default function SiteHeader() {
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-            <Icons.Menu className="h-5 w-5" />
+            <Icon name="menu" className="h-5 w-5" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
         </SheetTrigger>
@@ -55,7 +61,7 @@ export default function SiteHeader() {
               href="#/"
               className="flex items-center gap-2 text-lg font-semibold"
             >
-              <Icons.Menu className="h-6 w-6" />
+              <Icon name="menu" className="h-6 w-6" />
               <span className="sr-only">TTUMC</span>
             </Link>
             <Link
@@ -64,21 +70,27 @@ export default function SiteHeader() {
             >
               About
             </Link>
+            <Link
+              href="#/"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Rules
+            </Link>
             <Link href="#/" className="hover:text-foreground">
               Booking
             </Link>
           </nav>
         </SheetContent>
       </Sheet>
-      <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
+      <div className="flex w-full items-center justify-end gap-2 md:ml-auto md:gap-4">
         <Button variant="ghost" size="icon" className="rounded-full">
-          <Icons.Settings className="h-5 w-5" />
+          <Icon name="settings" className="h-5 w-5" />
           <span className="sr-only">Settings</span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
-              <Icons.CircleUser className="h-5 w-5" />
+              <Icon name="circle-user-round" className="h-5 w-5" />
               <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>
@@ -92,6 +104,9 @@ export default function SiteHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:hidden ">
+        <Image src="/ttumc-logo.svg" alt="ttumc-logo" width={40} height={40} />
+      </Link>
     </header>
   );
 }

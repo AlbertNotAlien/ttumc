@@ -5,6 +5,7 @@ import React from 'react';
  * @see https://v0.dev/t/5bXR2Lw54l9
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
+import { Icon } from '@/components/icon';
 import {
   TableHead,
   TableRow,
@@ -14,64 +15,182 @@ import {
   Table,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/components/icons';
 
 const DUMMY_DATA = {
-  date: ['28', '29', '30', '1', '2', '3', '4'],
+  currentYear: '2024',
+  currentMonth: 'April',
+  currentWeek: [
+    { year: 2024, month: 4, date: 28, day: 0 },
+    { year: 2024, month: 4, date: 29, day: 1 },
+    { year: 2024, month: 4, date: 30, day: 2 },
+    { year: 2024, month: 5, date: 1, day: 3 },
+    { year: 2024, month: 5, date: 2, day: 4 },
+    { year: 2024, month: 5, date: 3, day: 5 },
+    { year: 2024, month: 5, date: 4, day: 6 },
+  ],
+  bookedData: [
+    {
+      bandName: '大同大同',
+      date: { year: 2024, month: 5, date: 3, day: 5 },
+      times: ['01:00', '05:00'],
+    },
+  ],
 };
 
-const DAY_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_OF_WEEK = [
+  {
+    value: 0,
+    label: 'Sun',
+  },
+  {
+    value: 1,
+    label: 'Mon',
+  },
+  {
+    value: 2,
+    label: 'Tue',
+  },
+  {
+    value: 3,
+    label: 'Wed',
+  },
+  {
+    value: 4,
+    label: 'Thu',
+  },
+  {
+    value: 5,
+    label: 'Fri',
+  },
+  {
+    value: 6,
+    label: 'Sat',
+  },
+];
+
 const HOURS_OF_DAY = [
-  '12 AM',
-  '1 AM',
-  '2 AM',
-  '3 AM',
-  '4 AM',
-  '5 AM',
-  '6 AM',
-  '7 AM',
-  '8 AM',
-  '9 AM',
-  '10 AM',
-  '11 AM',
-  '12 PM',
-  '1 PM',
-  '2 PM',
-  '3 PM',
-  '4 PM',
-  '5 PM',
-  '6 PM',
-  '7 PM',
-  '8 PM',
-  '9 PM',
-  '10 PM',
-  '11 PM',
+  {
+    value: '00:00',
+    label: '12 AM',
+  },
+  {
+    value: '01:00',
+    label: '1 AM',
+  },
+  {
+    value: '02:00',
+    label: '2 AM',
+  },
+  {
+    value: '03:00',
+    label: '3 AM',
+  },
+  {
+    value: '04:00',
+    label: '4 AM',
+  },
+  {
+    value: '05:00',
+    label: '5 AM',
+  },
+  {
+    value: '06:00',
+    label: '6 AM',
+  },
+  {
+    value: '07:00',
+    label: '7 AM',
+  },
+  {
+    value: '08:00',
+    label: '8 AM',
+  },
+  {
+    value: '09:00',
+    label: '9 AM',
+  },
+  {
+    value: '10:00',
+    label: '10 AM',
+  },
+  {
+    value: '11:00',
+    label: '11 AM',
+  },
+  {
+    value: '12:00',
+    label: '12 PM',
+  },
+  {
+    value: '13:00',
+    label: '1 PM',
+  },
+  {
+    value: '14:00',
+    label: '2 PM',
+  },
+  {
+    value: '15:00',
+    label: '3 PM',
+  },
+  {
+    value: '16:00',
+    label: '4 PM',
+  },
+  {
+    value: '17:00',
+    label: '5 PM',
+  },
+  {
+    value: '18:00',
+    label: '6 PM',
+  },
+  {
+    value: '19:00',
+    label: '7 PM',
+  },
+  {
+    value: '20:00',
+    label: '8 PM',
+  },
+  {
+    value: '21:00',
+    label: '9 PM',
+  },
+  {
+    value: '22:00',
+    label: '10 PM',
+  },
+  {
+    value: '23:00',
+    label: '11 PM',
+  },
 ];
 
 export default function BookingCalendar() {
   return (
     <div className="w-full">
-      <div className="flex w-full items-center justify-between py-2">
-        <h3 className="text-2xl font-semibold md:text-3xl">2024 April</h3>
+      <div className="flex w-full items-center justify-between py-1 md:py-2">
+        <h3 className="text-2xl font-semibold md:text-3xl">{`${DUMMY_DATA.currentYear} ${DUMMY_DATA.currentMonth}`}</h3>
         <div className="flex">
           <Button variant="ghost" size="icon">
-            <Icons.ChevronLeft className="h-4 w-4" />
+            <Icon name="chevrons-left" className="h-4 w-4" />
           </Button>
           <Button variant="ghost">Today</Button>
           <Button variant="ghost" size="icon">
-            <Icons.ChevronRight className="h-4 w-4" />
+            <Icon name="chevrons-right" className="h-4 w-4" />
           </Button>
         </div>
       </div>
       <Table className="w-full table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-10 md:w-14" />
+            <TableHead className="w-8 md:w-14" />
             {DAY_OF_WEEK.map((day, index) => (
-              <TableHead key={day} className="p-0 text-xs">
+              <TableHead key={day.value} className="p-0 text-xs">
                 <div className="flex flex-col items-center justify-center md:flex-row md:gap-x-2 md:text-base">
-                  <p>{DUMMY_DATA.date[index]}</p>
-                  <p>{day}</p>
+                  <p>{DUMMY_DATA.currentWeek[index].date}</p>
+                  <p>{day.label}</p>
                 </div>
               </TableHead>
             ))}
@@ -82,22 +201,44 @@ export default function BookingCalendar() {
             <TableCell colSpan={8} className="p-0">
               <Button
                 variant="ghost"
-                className="flex h-8 w-full items-center justify-center"
+                className="flex h-10 w-full items-center justify-center"
               >
-                <Icons.ChevronsUp className="h-4" />
+                <Icon
+                  name="chevrons-up"
+                  className="h-4 stroke-muted-foreground"
+                />
               </Button>
             </TableCell>
           </TableRow>
           {HOURS_OF_DAY.map((hour) => (
-            <TableRow key={hour}>
-              <TableCell className="p-0 text-xs text-muted-foreground">
-                {hour}
+            <TableRow key={hour.value}>
+              <TableCell className="p-0 text-2xs text-muted-foreground md:text-xs">
+                {hour.label}
               </TableCell>
               {DAY_OF_WEEK.map((day) => (
-                <TableCell key={day} className="px-1 sm:px-2">
-                  <Button variant="outline" className="h-8 w-full">
-                    <Icons.Plus className="w-4 min-w-2" />
-                  </Button>
+                <TableCell
+                  key={day.value}
+                  className="px-0.5 py-2 md:px-2 md:py-4"
+                >
+                  {DUMMY_DATA.bookedData[0].date.year === 2024 &&
+                  DUMMY_DATA.bookedData[0].date.month === 5 &&
+                  DUMMY_DATA.bookedData[0].date.date === 3 &&
+                  // TODO: remove judge of day
+                  DUMMY_DATA.bookedData[0].date.day === day.value &&
+                  DUMMY_DATA.bookedData[0].times.includes(hour.value) ? (
+                    <Button
+                      variant="outline"
+                      className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
+                    >
+                      <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
+                        {DUMMY_DATA.bookedData[0].bandName}
+                      </p>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" className="h-10 w-full">
+                      <Icon name="plus" className="w-4 min-w-2" />
+                    </Button>
+                  )}
                 </TableCell>
               ))}
             </TableRow>

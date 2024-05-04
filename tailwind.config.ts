@@ -76,6 +76,14 @@ const config = {
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans],
       },
+      fontSize: {
+        '2xs': [
+          '0.625rem',
+          {
+            lineHeight: '0.875rem',
+          },
+        ],
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],
