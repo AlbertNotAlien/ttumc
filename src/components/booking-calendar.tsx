@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { ChevronsRight, ChevronsLeft, ChevronsUp, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { Button } from '@/components/ui/button';
 import {
   TableHead,
   TableRow,
@@ -10,7 +13,24 @@ import {
   TableBody,
   Table,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 
 const DUMMY_DATA = {
   currentYear: '2024',
@@ -26,7 +46,7 @@ const DUMMY_DATA = {
   ],
   bookedData: [
     {
-      bandName: '大同大同',
+      bandName: '大同大同國貨好，大同大同一級棒',
       date: { year: 2024, month: 4, date: 5, day: 0 },
       times: ['01:00', '05:00'],
     },
@@ -98,6 +118,20 @@ function isHourBooked(date: Date, hour: string) {
   );
 }
 
+function BookingForm({
+  className,
+}: React.ComponentProps<'form'> & { className?: string }) {
+  return (
+    <form className={cn('grid items-start gap-4', className)}>
+      {/* TODO: complete form layout */}
+      <select className="grid gap-2">
+        <option value="test">test</option>
+      </select>
+      <Button type="submit">Save changes</Button>
+    </form>
+  );
+}
+
 type CalendarControlsProps = {
   switchToPreviousWeek: React.MouseEventHandler<HTMLButtonElement>;
   switchToThisWeek: React.MouseEventHandler<HTMLButtonElement>;
@@ -118,7 +152,7 @@ function CalendarControls({
         Today
       </Button>
       <Button variant="ghost" size="icon" onClick={switchToNextWeek}>
-        <ChevronsRight name="chevrons-right" className="h-4 w-4" />
+        <ChevronsRight className="h-4 w-4" />
       </Button>
     </div>
   );
@@ -126,24 +160,17 @@ function CalendarControls({
 
 export default function BookingCalendar() {
   const [date, setDate] = useState(new Date());
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   const currentWeek = getWeekFromDate(date);
 
-  const switchToThisWeek = () => {
-    const today = new Date();
-    setDate(today);
-  };
+  const switchToThisWeek = () => setDate(new Date());
 
-  const switchToPreviousWeek = () => {
-    const dateBeforeAWeek = new Date(date);
-    dateBeforeAWeek.setDate(dateBeforeAWeek.getDate() - 7);
-    setDate(dateBeforeAWeek);
-  };
+  const switchToPreviousWeek = () =>
+    setDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7));
 
-  const switchToNextWeek = () => {
-    const dateAfterAWeek = new Date(date);
-    dateAfterAWeek.setDate(dateAfterAWeek.getDate() + 7);
-    setDate(dateAfterAWeek);
-  };
+  const switchToNextWeek = () =>
+    setDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7));
 
   return (
     <div className="w-full">
@@ -176,41 +203,100 @@ export default function BookingCalendar() {
                 variant="ghost"
                 className="flex h-10 w-full items-center justify-center"
               >
-                <ChevronsUp
-                  name="chevrons-up"
-                  className="h-4 stroke-muted-foreground"
-                />
+                <ChevronsUp className="h-4 stroke-muted-foreground" />
               </Button>
             </TableCell>
           </TableRow>
-          {HOURS_OF_DAY.map((hour) => (
-            <TableRow key={hour.value}>
-              <TableCell className="p-0 text-2xs text-muted-foreground md:text-xs">
-                {hour.label}
-              </TableCell>
-              {currentWeek.map((_date) => (
-                <TableCell
-                  key={_date.toString()}
-                  className="px-0.5 py-2 md:px-2 md:py-4"
-                >
-                  {isHourBooked(_date, hour.value) ? (
-                    <Button
-                      variant="outline"
-                      className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
+          {isDesktop ? (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              {HOURS_OF_DAY.map((hour) => (
+                <TableRow key={hour.value}>
+                  <TableCell className="p-0 text-2xs text-muted-foreground md:text-xs">
+                    {hour.label}
+                  </TableCell>
+                  {currentWeek.map((_date) => (
+                    <TableCell
+                      key={_date.toString()}
+                      className="px-0.5 py-2 md:px-2 md:py-4"
                     >
-                      <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
-                        {DUMMY_DATA.bookedData[0].bandName}
-                      </p>
-                    </Button>
-                  ) : (
-                    <Button variant="outline" className="h-10 w-full">
-                      <Plus name="plus" className="w-4 min-w-2" />
-                    </Button>
-                  )}
-                </TableCell>
+                      <DialogTrigger asChild>
+                        {isHourBooked(_date, hour.value) ? (
+                          <Button
+                            variant="outline"
+                            className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
+                          >
+                            <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
+                              {DUMMY_DATA.bookedData[0].bandName}
+                            </p>
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="h-10 w-full">
+                            <Plus className="w-4 min-w-2" />
+                          </Button>
+                        )}
+                      </DialogTrigger>
+                    </TableCell>
+                  ))}
+                </TableRow>
               ))}
-            </TableRow>
-          ))}
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit profile</DialogTitle>
+                  <DialogDescription>
+                    {`Make changes to your profile here. Click save when you're done.`}
+                  </DialogDescription>
+                </DialogHeader>
+                <BookingForm />
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <Drawer open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              {HOURS_OF_DAY.map((hour) => (
+                <TableRow key={hour.value}>
+                  <TableCell className="p-0 text-2xs text-muted-foreground md:text-xs">
+                    {hour.label}
+                  </TableCell>
+                  {currentWeek.map((_date) => (
+                    <TableCell
+                      key={_date.toString()}
+                      className="px-0.5 py-2 md:px-2 md:py-4"
+                    >
+                      <DrawerTrigger asChild>
+                        {isHourBooked(_date, hour.value) ? (
+                          <Button
+                            variant="outline"
+                            className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
+                          >
+                            <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
+                              {DUMMY_DATA.bookedData[0].bandName}
+                            </p>
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="h-10 w-full">
+                            <Plus className="w-4 min-w-2" />
+                          </Button>
+                        )}
+                      </DrawerTrigger>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+              <DrawerContent>
+                <DrawerHeader className="text-left">
+                  <DrawerTitle>Edit profile</DrawerTitle>
+                  <DrawerDescription>
+                    {`Make changes to your profile here. Click save when you're done.`}
+                  </DrawerDescription>
+                </DrawerHeader>
+                <BookingForm className="px-4" />
+                <DrawerFooter className="pt-2">
+                  <DrawerClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+          )}
         </TableBody>
       </Table>
     </div>
