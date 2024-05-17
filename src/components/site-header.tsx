@@ -26,6 +26,7 @@ export default function SiteHeader() {
             alt="ttumc-logo"
             width={36}
             height={36}
+            priority
           />
           <span className="sr-only">TTUMC</span>
         </Link>
@@ -105,7 +106,13 @@ export default function SiteHeader() {
         </DropdownMenu>
       </div>
       <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:hidden ">
-        <Image src="/ttumc-logo.svg" alt="ttumc-logo" width={40} height={40} />
+        <Image
+          src="/ttumc-logo.svg"
+          alt="ttumc-logo"
+          width={40}
+          height={40}
+          priority
+        />
       </Link>
     </header>
   );

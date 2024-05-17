@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronsRight, ChevronsLeft, ChevronsUp, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Event } from '@/lib/firebase/firestore';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,27 +32,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-
-const DUMMY_DATA = {
-  currentYear: '2024',
-  currentMonth: 'April',
-  currentWeek: [
-    { year: 2024, month: 4, date: 28, day: 0 },
-    { year: 2024, month: 4, date: 29, day: 1 },
-    { year: 2024, month: 4, date: 30, day: 2 },
-    { year: 2024, month: 5, date: 1, day: 3 },
-    { year: 2024, month: 5, date: 2, day: 4 },
-    { year: 2024, month: 5, date: 3, day: 5 },
-    { year: 2024, month: 5, date: 4, day: 6 },
-  ],
-  bookedData: [
-    {
-      bandName: '大同大同國貨好，大同大同一級棒',
-      date: { year: 2024, month: 4, date: 5, day: 0 },
-      times: ['01:00', '05:00'],
-    },
-  ],
-};
 
 const MONTHS_OF_YEAR = [
   'Jan',
@@ -108,13 +88,15 @@ function getWeekFromDate(date: Date) {
   });
 }
 
-function isHourBooked(date: Date, hour: string) {
-  return DUMMY_DATA.bookedData.some(
-    (booking) =>
-      booking.date.year === date.getFullYear() &&
-      booking.date.month === date.getMonth() &&
-      booking.date.date === date.getDate() &&
-      booking.times.includes(hour),
+function getHourBookedData(events: Event[], date: Date, hour: string) {
+  if (events.length === 0) return undefined;
+
+  return events.find(
+    (event) =>
+      event.date.year === date.getFullYear() &&
+      event.date.month === date.getMonth() &&
+      event.date.date === date.getDate() &&
+      event.times.includes(hour),
   );
 }
 
@@ -158,24 +140,40 @@ function CalendarControls({
   );
 }
 
-export default function BookingCalendar() {
-  const [date, setDate] = useState(new Date());
+type BookingCalendarProps = {
+  events: Event[] | undefined;
+};
+
+export default function BookingCalendar({ events = [] }: BookingCalendarProps) {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const currentWeek = getWeekFromDate(date);
+  const selectedWeek = getWeekFromDate(selectedDate);
 
-  const switchToThisWeek = () => setDate(new Date());
+  const switchToThisWeek = () => setSelectedDate(new Date());
 
   const switchToPreviousWeek = () =>
-    setDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7));
+    setSelectedDate(
+      new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate() - 7,
+      ),
+    );
 
   const switchToNextWeek = () =>
-    setDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7));
+    setSelectedDate(
+      new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate() + 7,
+      ),
+    );
 
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between py-1 md:py-2">
-        <h3 className="text-2xl font-semibold md:text-3xl">{`${date.getFullYear()} ${MONTHS_OF_YEAR[date.getMonth()]}`}</h3>
+        <h3 className="text-2xl font-semibold md:text-3xl">{`${selectedDate.getFullYear()} ${MONTHS_OF_YEAR[selectedDate.getMonth()]}`}</h3>
         <CalendarControls
           switchToPreviousWeek={switchToPreviousWeek}
           switchToThisWeek={switchToThisWeek}
@@ -186,11 +184,11 @@ export default function BookingCalendar() {
         <TableHeader>
           <TableRow>
             <TableHead className="w-8 md:w-14" />
-            {currentWeek.map((_date, index) => (
-              <TableHead key={_date.toString()} className="p-0 text-xs">
+            {selectedWeek.map((date, index) => (
+              <TableHead key={date.toString()} className="p-0 text-xs">
                 <div className="flex flex-col items-center justify-center md:flex-row md:gap-x-2 md:text-base">
-                  <p>{currentWeek[index].getDate()}</p>
-                  <p>{DAYS_OF_WEEK[_date.getDay()]}</p>
+                  <p>{selectedWeek[index].getDate()}</p>
+                  <p>{DAYS_OF_WEEK[date.getDay()]}</p>
                 </div>
               </TableHead>
             ))}
@@ -214,29 +212,36 @@ export default function BookingCalendar() {
                   <TableCell className="p-0 text-2xs text-muted-foreground md:text-xs">
                     {hour.label}
                   </TableCell>
-                  {currentWeek.map((_date) => (
-                    <TableCell
-                      key={_date.toString()}
-                      className="px-0.5 py-2 md:px-2 md:py-4"
-                    >
-                      <DialogTrigger asChild>
-                        {isHourBooked(_date, hour.value) ? (
-                          <Button
-                            variant="outline"
-                            className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
-                          >
-                            <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
-                              {DUMMY_DATA.bookedData[0].bandName}
-                            </p>
-                          </Button>
-                        ) : (
-                          <Button variant="outline" className="h-10 w-full">
-                            <Plus className="w-4 min-w-2" />
-                          </Button>
-                        )}
-                      </DialogTrigger>
-                    </TableCell>
-                  ))}
+                  {selectedWeek.map((currentDate) => {
+                    const bookedData = getHourBookedData(
+                      events,
+                      currentDate,
+                      hour.value,
+                    );
+                    return (
+                      <TableCell
+                        key={currentDate.toString()}
+                        className="px-0.5 py-2 md:px-2 md:py-4"
+                      >
+                        <DialogTrigger asChild>
+                          {bookedData ? (
+                            <Button
+                              variant="outline"
+                              className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
+                            >
+                              <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
+                                {bookedData.bandName}
+                              </p>
+                            </Button>
+                          ) : (
+                            <Button variant="outline" className="h-10 w-full">
+                              <Plus className="w-4 min-w-2" />
+                            </Button>
+                          )}
+                        </DialogTrigger>
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
               <DialogContent className="sm:max-w-[425px]">
@@ -256,29 +261,36 @@ export default function BookingCalendar() {
                   <TableCell className="p-0 text-2xs text-muted-foreground md:text-xs">
                     {hour.label}
                   </TableCell>
-                  {currentWeek.map((_date) => (
-                    <TableCell
-                      key={_date.toString()}
-                      className="px-0.5 py-2 md:px-2 md:py-4"
-                    >
-                      <DrawerTrigger asChild>
-                        {isHourBooked(_date, hour.value) ? (
-                          <Button
-                            variant="outline"
-                            className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
-                          >
-                            <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
-                              {DUMMY_DATA.bookedData[0].bandName}
-                            </p>
-                          </Button>
-                        ) : (
-                          <Button variant="outline" className="h-10 w-full">
-                            <Plus className="w-4 min-w-2" />
-                          </Button>
-                        )}
-                      </DrawerTrigger>
-                    </TableCell>
-                  ))}
+                  {selectedWeek.map((date) => {
+                    const bookedData = getHourBookedData(
+                      events,
+                      date,
+                      hour.value,
+                    );
+                    return (
+                      <TableCell
+                        key={date.toString()}
+                        className="px-0.5 py-2 md:px-2 md:py-4"
+                      >
+                        <DrawerTrigger asChild>
+                          {bookedData ? (
+                            <Button
+                              variant="outline"
+                              className="h-10 max-h-10 w-full whitespace-normal px-1 py-0"
+                            >
+                              <p className="line-clamp-2 text-2xs md:line-clamp-1 md:text-xs">
+                                {bookedData.bandName}
+                              </p>
+                            </Button>
+                          ) : (
+                            <Button variant="outline" className="h-10 w-full">
+                              <Plus className="w-4 min-w-2" />
+                            </Button>
+                          )}
+                        </DrawerTrigger>
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
               <DrawerContent>
